@@ -1729,7 +1729,7 @@ const makeComparable=data=>{
  for(const t of d.teams||[]){t.state=String(t.state||'SC').toUpperCase();t.association=t.state!=='SC'?'OUT':String(t.association||'SCHSL').toUpperCase()==='SCISA'?'SCISA':'SCHSL';t.color=cleanColor(t.color);t.secondaryColor=cleanColor(t.secondaryColor,'#f0b44d');}
  for(const g of d.games||[]){if(g.neutralSite==null)g.neutralSite=false;g.venue||='';g.tournamentId||='';}
  delete d.meta; // publication date and source metadata are not user edits
- const keys=['teams','players','games','articles','rankings','rpi','alumni','tournaments','site','settings'];
+ const keys=['teams','players','games','articles','rankings','rpi','alumni','tournaments','site','settings','seasons'];
  return JSON.stringify(keys.map(k=>[k,d[k]??null]));
 };
 function draftStatus(){const pub=app.publicData||SEED_DATA;
@@ -1771,5 +1771,238 @@ window.PalmettoV8=()=>({version:'8.0',status:draftStatus(),featuredStories:publi
 })();
 
 </script>
+<style id="pd-v9-style">
+.pd9-panel{border:1px solid #d6e0e8;border-radius:13px;background:#f9fbfd;padding:17px;margin:15px 0;color:#203650}
+.pd9-panel h3{font-family:var(--display);font-size:24px;text-transform:uppercase;margin:0 0 8px}
+.pd9-note{font-size:12px;line-height:1.65;color:#53667a;margin:7px 0 11px}
+.pd9-toolbar{display:flex;align-items:end;gap:9px;flex-wrap:wrap}
+.pd9-toolbar label{display:grid;gap:5px;font-size:11px;font-weight:800;flex:1 1 130px}
+.pd9-toolbar .input{width:100%;min-width:0}
+.pd9-toolbar .btn{align-self:end;white-space:normal}
+.pd9-year{border:1px solid #e3e9f1;background:#fff;padding:11px 13px;border-radius:9px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}
+.pd9-year strong{font-size:13px}
+.pd9-subline{font-size:11px;color:#607285}
+.pd9-transfer-history{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.pd9-transfer-chip{font-size:11px;padding:7px 10px;border-radius:8px;background:#eaf0f7;color:#243a57;font-weight:700}
+.pd9-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.pd9-card{padding:16px;border:1px solid #dfe6ee;border-radius:11px;background:white}
+.pd9-card b{display:block;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.07em}
+.pd9-card strong{display:block;font-family:var(--display);font-size:30px;line-height:1.1;color:#14243a}
+.pd9-bio{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;background:#10233c;color:#fff;padding:25px;border-radius:13px;margin:12px 0 22px}
+.pd9-bio h1{font-family:var(--display);font-size:clamp(34px,5vw,60px);margin:4px 0;color:#fff}
+.pd9-bio p{color:#d4deea;margin:0;font-size:13px}
+.pd9-bio a{color:#ffa074}
+.pd9-history{font-size:11px;color:#62758b}
+.pd9-college-row{display:grid;grid-template-columns:1.9fr 1fr .7fr .7fr auto;gap:7px;align-items:center;margin:8px 0}
+.pd9-college-row .input{min-width:0;width:100%}
+.pd9-college-labels{font-size:10px;color:#63768b;font-weight:800}
+.pd9-season-tools{margin-bottom:18px}
+.pd9-source-banner{font-size:11px;line-height:1.7;color:#516376;background:#f1f5fa;border-left:3px solid #ec6b51;padding:11px;margin:12px 0}
+.pd9-season-history-table{margin-bottom:22px}
+.pd9-school-link{font-weight:750}
+@media(max-width:700px){.pd9-bio{grid-template-columns:1fr}.pd9-cards{grid-template-columns:1fr}.pd9-college-row{grid-template-columns:1fr 1fr}.pd9-college-labels{display:none}.pd9-toolbar .btn{width:100%}}
+</style>
+<script id="pd-v9-js">
+/* Palmetto Diamond V9 — historical seasons, transferable identity, linked alumni.
+   All records remain in the existing site-data.json; no replacement public data.
+   This layer is deliberately appended to the single HTML file. */
+(()=>{
+'use strict';
+const existingUpgrade=upgradeLegacyData;
+const existingSeasons=allSeasons;
+const existingClubPlayers=clubPlayers;
+const existingRenderPlayers=renderPlayers;
+const existingPlayerDetail=renderPlayerDetail;
+const existingTeamDetail=renderTeamDetail;
+const existingStats=renderStats;
+const existingGameEditor=gameEditor;
+const existingAdminRoster=adminRoster;
+const existingAdminAlumni=adminAlumni;
+const existingSaveRoster=saveRoster;
+const existingSaveAlumni=saveAlumni;
+const existingEnsurePlayer=ensurePlayer;
+const existingGamesBySeason=gamesBySeason;
+const existingAlumniFor=alumniFor;
+const yearOK=y=>/^(19|20)\d{2}$/.test(String(y||''));
+const latestYear=h=>Math.max(0,...(h||[]).map(x=>Number(x.season)||0));
+const teamName=id=>team(id).name||'Unknown school';
+const string=(v)=>String(v??'').trim();
+function assignments(p,year){let h=Array.isArray(p?.rosterHistory)?p.rosterHistory:[];if(year!=null)h=h.filter(r=>String(r.season)===String(year));return h;}
+function rosterAt(p,tid,year){return assignments(p,year).some(r=>r.teamId===tid);}
+function currentTeamAt(p,year){const a=assignments(p,year);return a.length?a[a.length-1].teamId:(assignments(p).slice().sort((x,y)=>Number(y.season)-Number(x.season))[0]?.teamId||p.teamId||'');}
+function seasonInfo(p,tid,year){return assignments(p,year).find(h=>h.teamId===tid)||{number:p.number,position:p.position};}
+function refreshIdentity(p){
+  const raw=Array.isArray(p.rosterHistory)?p.rosterHistory:[];
+  const dedup=new Map();for(const h of raw){const year=string(h?.season),tid=string(h?.teamId);if(!yearOK(year)||!tid)continue;dedup.set(year+'|'+tid,{season:year,teamId:tid,number:h.number==null||h.number===''?null:Math.trunc(Number(h.number)||0),position:string(h.position||'')});}
+  p.rosterHistory=[...dedup.values()].sort((a,b)=>Number(a.season)-Number(b.season)||a.teamId.localeCompare(b.teamId));
+  p.rosterSeasons=[...new Set(p.rosterHistory.map(h=>h.season))].sort();
+  const latest=p.rosterHistory[p.rosterHistory.length-1];if(latest){p.teamId=latest.teamId;if(latest.position)p.position=latest.position;if(latest.number!=null)p.number=latest.number;}
+}
+function addAssignment(p,tid,year,number=p.number,position=p.position){
+ if(!yearOK(year)||!app.db.teams.some(t=>t.id===tid))return false;
+ p.rosterHistory ||= [];
+ const at=p.rosterHistory.find(x=>x.teamId===tid&&String(x.season)===String(year));
+ if(at){if(number!=null&&number!=='')at.number=Math.trunc(Number(number)||0);if(position)at.position=string(position);}else p.rosterHistory.push({season:String(year),teamId:tid,number:number===''?null:number??null,position:string(position||'')});
+ refreshIdentity(p);return true;
+}
+function normalizeV9(db){
+ db.seasons=Array.isArray(db.seasons)?[...new Set(db.seasons.map(String).filter(yearOK))]:[];
+ db.players ||= [];
+ for(const p of db.players){
+  if(!Array.isArray(p.rosterHistory))p.rosterHistory=[];
+  // Convert prior one-team roster seasons without changing stats or IDs.
+  for(const y of (p.rosterSeasons||[])){if(yearOK(y)&&!p.rosterHistory.some(x=>String(x.season)===String(y)))p.rosterHistory.push({season:String(y),teamId:p.teamId,number:p.number,position:p.position});}
+  refreshIdentity(p);
+ }
+ // The team side of an entered game is authoritative for that game and season.
+ for(const g of (db.games||[])){
+  const y=string(g.season||g.date?.slice(0,4));if(!yearOK(y))continue;
+  for(const side of ['home','away'])for(const kind of ['batting','pitching','fielding'])for(const row of g[kind]?.[side]||[]){
+   const p=db.players.find(p=>p.id===row.playerId);if(!p)continue;
+   const tid=g[side+'Id'];if(!p.rosterHistory.some(x=>x.teamId===tid&&String(x.season)===y))addAssignment(p,tid,y,p.number,p.position);
+  }
+ }
+ db.alumni||=[];
+ for(const a of db.alumni){if(!Array.isArray(a.collegeHistory))a.collegeHistory=[];if(a.playerId&&!db.players.some(p=>p.id===a.playerId))a.playerId='';}
+ return db;
+}
+upgradeLegacyData=function(data){return normalizeV9(existingUpgrade(data));};
+normalizeV9(app.db);
+if(app.publicData)normalizeV9(app.publicData);
+allSeasons=function(){const fromData=[...(app.db.seasons||[]),...(app.db.players||[]).flatMap(p=>assignments(p).map(x=>x.season)),...(app.db.games||[]).map(g=>g.season||g.date?.slice(0,4)),...existingSeasons()];return [...new Set(fromData.map(String).filter(yearOK))].sort((a,b)=>Number(b)-Number(a));};
+clubPlayers=function(tid,year=app.season){return app.db.players.filter(p=>rosterAt(p,tid,year)).sort((a,b)=>(Number(seasonInfo(a,tid,year).number??999)-Number(seasonInfo(b,tid,year).number??999))||a.name.localeCompare(b.name));};
+alumniFor=function(tid,kind){return existingAlumniFor(tid,kind).concat((app.db.alumni||[]).filter(a=>a.teamId!==tid&&a.category===kind&&(kind!=='college'||a.current!==false)&&a.playerId&&app.db.players.some(p=>p.id===a.playerId&&assignments(p).some(h=>h.teamId===tid)))).filter((a,i,arr)=>arr.findIndex(x=>x.id===a.id)===i).sort((a,b)=>a.name.localeCompare(b.name));};
+// A known player ID wins; otherwise match by name within that specific school's season.
+ensurePlayer=function(tid,name,number,position,previousId){
+ const yr=string(ensureEditGame()?.season||app.season);
+ const norm=string(name).toLowerCase().replace(/\s+/g,' ');if(!norm)return null;
+ let p=app.db.players.find(x=>x.id===previousId);
+ if(!p)p=app.db.players.find(x=>x.name.toLowerCase().replace(/\s+/g,' ')===norm&&rosterAt(x,tid,yr));
+ if(!p){p={id:uid('player'),name:string(name),teamId:tid,number:number??null,position:string(position||''),gradYear:null,rosterHistory:[],rosterSeasons:[]};app.db.players.push(p);}
+ if(!p.name)p.name=string(name);
+ addAssignment(p,tid,yr,number??p.number,position||p.position);
+ return p.id;
+};
+// The scorekeeper's player choices must match the game's year and each team's roster.
+gameEditor=function(){const g=ensureEditGame();const tid=g[app.scorekeeperSide+'Id'];const season=g.season||app.season;const old=app.db.players.map(p=>[p,p.teamId,p.number,p.position]);for(const [p] of old){if(rosterAt(p,tid,season)){p.teamId=tid;const x=seasonInfo(p,tid,season);p.number=x.number;p.position=x.position;}else p.teamId='__pd9_not_on_roster__';}
+ try{return existingGameEditor();}finally{for(const [p,id,no,pos] of old){p.teamId=id;p.number=no;p.position=pos;}}
+};
+// This season's page must select a player's school from that season, not the latest profile school.
+renderPlayers=function(){const f=app.filters;const year=String(app.season);
+ const records=app.db.players.flatMap(p=>assignments(p,year).map(h=>({p,h,t:team(h.teamId)}))).filter(({p,h,t})=>(f.team==='all'||h.teamId===f.team)&&(!f.query||`${p.name} ${h.number??''} ${t.name}`.toLowerCase().includes(f.query.toLowerCase()))).sort((a,b)=>a.p.name.localeCompare(b.p.name));
+ return `${pageHeading('Player database',`Historical rosters and season-specific schools. A transfer retains one career player profile.`)}<div class="filter-bar"><div class="filter-item"><label>Season</label>${seasonFilter()}</div><div class="filter-item grow"><label>School</label><select data-filter="team"><option value="all">All teams</option>${teamOptions(f.team)}</select></div><div class="filter-item grow"><label>Search players</label><input class="input" data-filter="query" placeholder="Name, school or number" value="${esc(f.query)}"></div></div><div class="panel table-wrap"><table><thead><tr><th>Player</th><th>School (${esc(year)})</th><th>Position</th><th class="num">AB</th><th class="num">AVG</th><th class="num">OPS</th><th class="num">IP</th><th class="num">K</th></tr></thead><tbody>${records.map(({p,h,t})=>{const b=teamStat(p.id,year,h.teamId,'batting'),q=teamStat(p.id,year,h.teamId,'pitching');return `<tr><td><a href="#player:${esc(p.id)}">${esc(p.name)}</a> <small>${h.number==null?'':'#'+esc(h.number)}</small></td><td><a href="#team:${esc(t.id)}">${esc(t.name)}</a></td><td>${esc(h.position||p.position||'—')}</td><td class="num">${b.ab}</td><td class="num">${b.avg}</td><td class="num">${b.ops}</td><td class="num">${q.outs?q.ip:'—'}</td><td class="num">${q.outs?q.so:'—'}</td></tr>`;}).join('')||'<tr><td colspan="8" class="empty">No players rostered in this season. Create historical rosters under Site Editor → Rosters.</td></tr>'}</tbody></table></div>`;
+};
+// Team-specific stats: never transfer old game totals to a new school's page.
+let teamStatsScope='';
+function teamStat(pid,year,tid,kind){const prev=teamStatsScope;teamStatsScope=tid;try{return kind==='pitching'?pitchingTotals(pid,year):kind==='fielding'?fieldingTotals(pid,year):battingTotals(pid,year);}finally{teamStatsScope=prev;}}
+gamesBySeason=function(year=app.season){const games=existingGamesBySeason(year);return teamStatsScope?games.filter(g=>g.homeId===teamStatsScope||g.awayId===teamStatsScope):games;};
+// Render unchanged rich V8 school layout, but with year/school-specific roster and stats.
+renderTeamDetail=function(id){const old=teamStatsScope;teamStatsScope=id;
+ const originals=app.db.players.map(p=>[p,p.number,p.position]);
+ for(const [p] of originals)if(rosterAt(p,id,app.season)){const info=seasonInfo(p,id,app.season);p.number=info.number;p.position=info.position;}
+ let html;try{html=existingTeamDetail(id);}finally{teamStatsScope=old;for(const [p,num,pos] of originals){p.number=num;p.position=pos;}}
+ if(app.teamTab==='alumni')for(const a of alumniFor(id,'college').concat(alumniFor(id,'pro'))){if(a.playerId){const from=`<td>${esc(a.name)}</td>`;html=html.replace(from,`<td><a href="#player:${esc(a.playerId)}" class="pd9-school-link">${esc(a.name)} ↗</a></td>`);}if(a.category==='college'&&a.collegeHistory?.length){const oldSchool=`<td>${esc(a.college||'—')}</td>`;const prior=a.collegeHistory.map(x=>`${x.college}${x.startYear?' ('+x.startYear+'–'+(x.endYear||'')+')':''}`).join(' · ');html=html.replace(oldSchool,`<td>${esc(a.college||'—')}<div class="pd9-history">Previously: ${esc(prior)}</div></td>`);}}
+ return html;
+};
+// The V8 leaderboard groups players by p.teamId, so present a temporary
+// season-specific affiliation while building its HTML (never persist it).
+renderStats=function(){const snap=app.db.players.map(p=>[p,p.teamId]);for(const [p] of snap)p.teamId=currentTeamAt(p,app.season)||p.teamId;
+ try{return existingStats();}finally{for(const [p,id] of snap)p.teamId=id;}
+};
+// A season in history can predate the first data entered in earlier versions.
+function yearManager(){return `<div class="pd9-panel pd9-season-tools"><h3>Historical seasons</h3><p class="pd9-note">Add 2025, 2024, or earlier seasons to the season picker—even before you've entered their first game. Games entered for those dates automatically join the corresponding season.</p><form id="pd9-season-form" class="pd9-toolbar"><label>Season year <input class="input" name="year" required type="number" min="1900" max="2099" value="${esc(app.season||'2025')}"></label><button type="submit" class="btn dark sm">Add / switch to season</button></form><div class="pd9-subline">Available: ${allSeasons().join(' · ')}</div></div>`;}
+function assignmentEditor(){const tid=app.adminRosterTeamId||app.db.teams[0]?.id;const p=app.db.players.find(x=>x.id===app.adminRosterEditId);
+ const choices=app.db.players.filter(x=>x.id!==p?.id).sort((a,b)=>a.name.localeCompare(b.name));
+ const linkExisting=`<div class="pd9-panel"><h3>Transfer / connect an existing player</h3><p class="pd9-note">Choose the player's existing profile instead of adding a second player with the same name. His previous high school statistics stay with his career profile.</p><form id="pd9-link-existing" class="pd9-toolbar"><label>Existing player<select class="input" name="playerId" required><option value="">Select existing player</option>${choices.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} · ${esc(teamName(x.teamId))}</option>`).join('')}</select></label><label>Season<input class="input" name="year" type="number" min="1900" max="2099" required value="${esc(app.season)}"></label><button type="submit" class="btn dark sm">Add to ${esc(teamName(tid))} roster</button></form></div>`;
+ if(!p)return yearManager()+linkExisting;
+ const table=assignments(p).map(h=>`<div class="pd9-year"><div><strong>${esc(h.season)} · ${esc(teamName(h.teamId))}</strong><div class="pd9-subline">${h.position?esc(h.position)+' · ':''}${h.number==null?'':'#'+esc(h.number)}</div></div><button type="button" class="btn light sm" data-action="pd9-remove-assignment" data-id="${esc(p.id)}" data-year="${esc(h.season)}" data-team="${esc(h.teamId)}">Remove assignment</button></div>`).join('')||'<div class="pd9-note">No team seasons assigned yet.</div>';
+ return yearManager()+`<div class="pd9-panel"><h3>${esc(p.name)} · High school history</h3><p class="pd9-note">Add any previous or new high school here. The profile ID and all saved game logs remain the same.</p>${table}<form id="pd9-assignment-form" class="pd9-toolbar"><input type="hidden" name="playerId" value="${esc(p.id)}"><label>School<select name="teamId" class="input">${teamOptions(tid)}</select></label><label>Season year<input name="year" class="input" type="number" min="1900" max="2099" required value="${esc(app.season)}"></label><label>Number<input name="number" class="input" type="number" min="0" value="${esc(p.number??'')}"></label><label>Position<input name="position" class="input" value="${esc(p.position||'')}"></label><button type="submit" class="btn dark sm">Add / update season</button></form></div>`+linkExisting;
+}
+adminRoster=function(){let html=existingAdminRoster();const p=app.db.players.find(x=>x.id===app.adminRosterEditId),tid=app.adminRosterTeamId||app.db.teams[0]?.id;
+ if(p){const oldVal=esc((p.rosterSeasons||[]).join(', ')),newVal=esc(assignments(p).filter(h=>h.teamId===tid).map(h=>h.season).join(', '));html=html.replace(`name="rosterSeasons" value="${oldVal}"`,`name="rosterSeasons" value="${newVal}"`);}
+ return html.replace('<hr class="form-divider"><h3>All saved players',assignmentEditor()+'<hr class="form-divider"><h3>All saved players');
+};
+saveRoster=function(e){e.preventDefault();const f=new FormData(e.target),tid=app.adminRosterTeamId||app.db.teams[0]?.id,name=string(f.get('name'));
+ if(!name){toast('Enter a player name.');return;}
+ const years=[...new Set(string(f.get('rosterSeasons')).split(/[ ,;]+/).filter(yearOK))];if(!years.length){toast('Enter at least one valid roster season, e.g. 2025.');return;}
+ let p=app.db.players.find(x=>x.id===app.adminRosterEditId);if(!p){p={id:uid('player'),name,teamId:tid,position:'',number:null,gradYear:null,rosterHistory:[]};app.db.players.push(p);}
+ p.name=name;p.gradYear=asInteger(f.get('gradYear'));
+ const num=asInteger(f.get('number')),pos=string(f.get('position'));
+ p.rosterHistory||=[];
+ // Keep assignments from other schools. Do not silently erase a season with saved box scores.
+ p.rosterHistory=p.rosterHistory.filter(h=>h.teamId!==tid||years.includes(String(h.season))||app.db.games.some(g=>String(g.season||g.date?.slice(0,4))===String(h.season)&&['home','away'].some(side=>g[side+'Id']===tid&&['batting','pitching','fielding'].some(kind=>g[kind]?.[side]?.some(r=>r.playerId===p.id)))));
+ for(const y of years)addAssignment(p,tid,y,num,pos);
+ refreshIdentity(p);app.adminRosterEditId=null;saveDraft();render();toast('Player and season-specific school history saved. Publish to update public pages.');
+};
+// V8 roster rollover action is delegated inside its closure; capture it before
+// the old handler and use the new school/season assignments.
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action="pd8-copy-roster"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();const tid=app.adminRosterTeamId||app.db.teams[0]?.id,from=String(app.pd8From),to=String(app.pd8To);
+ if(!yearOK(from)||!yearOK(to)||from===to){toast('Choose different source and destination seasons.');return;}
+ const selected=app.db.players.filter(p=>rosterAt(p,tid,from)&&!rosterAt(p,tid,to)&&(app.pd8IncludeGraduates||!p.gradYear||Number(p.gradYear)>=Number(to)));
+ if(!selected.length){toast('No eligible players left to copy.');return;}
+ if(!confirm(`Copy ${selected.length} eligible players from ${from} to the ${to} roster for ${teamName(tid)}? Past stats remain intact.`))return;
+ for(const p of selected){const info=seasonInfo(p,tid,from);addAssignment(p,tid,to,info.number,info.position);}
+ app.db.seasons=[...new Set([...(app.db.seasons||[]),to])];saveDraft();render();toast(`${selected.length} players copied to ${to}.`);
+},true);
+// Explicitly link an alumni record to an existing high school player ID.
+const playerOptions=sel=>`<option value="">Not linked — create or choose high school profile first</option>${[...app.db.players].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${esc(p.id)}" ${sel===p.id?'selected':''}>${esc(p.name)} · ${esc(teamName(p.teamId))} · ${esc(p.gradYear||'—')}</option>`).join('')}`;
+function collegeHistoryRows(items){return (items||[]).map(x=>`<div class="pd9-college-row"><input class="input" name="pd9CollegeName[]" placeholder="Previous college" value="${esc(x.college||'')}" aria-label="Prior college"><input class="input" name="pd9CollegeDivision[]" placeholder="D1 / D2 / JUCO" value="${esc(x.division||'')}" aria-label="Prior division"><input class="input" name="pd9CollegeStart[]" type="number" min="1900" max="2099" placeholder="From" value="${esc(x.startYear||'')}" aria-label="From year"><input class="input" name="pd9CollegeEnd[]" type="number" min="1900" max="2099" placeholder="To" value="${esc(x.endYear||'')}" aria-label="To year"><button type="button" class="btn light sm" data-action="pd9-remove-college-row" aria-label="Remove college row">Remove</button></div>`).join('');}
+adminAlumni=function(){let html=existingAdminAlumni();const a=(app.db.alumni||[]).find(x=>x.id===app.adminAlumniEditId);
+ const linked=`<div class="field full"><label>Link to high school player profile</label><select class="input" name="playerId">${playerOptions(a?.playerId||'')}</select><p class="pd9-note">Required for college/pro alumni names to link to historical high school stats. Matches are manual so same-name players are never mixed up.</p></div>`;
+ html=html.replace('<form id="alumni-form" class="form-grid two">','<form id="alumni-form" class="form-grid two">'+linked);
+ if((app.adminAlumniKind||'college')==='college'){
+  const hist=`<div class="field full pd9-panel"><h3>Previous colleges / transfers</h3><p class="pd9-note">The College field above is the CURRENT program. Add every earlier college here in order. Keep official roster/source verification current.</p><div class="pd9-college-labels pd9-college-row"><span>College</span><span>Division</span><span>From</span><span>To</span></div><div id="pd9-college-history">${collegeHistoryRows(a?.collegeHistory||[])}</div><button type="button" class="btn light sm" data-action="pd9-add-college-row">+ Add previous college</button></div>`;
+  html=html.replace('<div class="field"><label>Source link (official roster preferred)</label>',hist+'<div class="field"><label>Source link (official roster preferred)</label>');
+ }
+ return html;
+};
+saveAlumni=function(e){e.preventDefault();const f=new FormData(e.target),name=string(f.get('name')),kind=app.adminAlumniKind||'college';
+ if(!name){toast('Enter a full player name.');return;}
+ const src=string(f.get('sourceUrl'));if(src&&!/^https?:\/\//i.test(src)){toast('Use a valid source URL.');return;}
+ const playerId=string(f.get('playerId'));if(playerId&&!app.db.players.some(p=>p.id===playerId)){toast('Choose an existing player profile.');return;}
+ const vals={name,category:kind,teamId:string(f.get('teamId')),gradYear:asInteger(f.get('gradYear')),position:string(f.get('position')),sourceUrl:src,verifiedDate:string(f.get('verifiedDate')),playerId};
+ if(kind==='college'){
+  vals.college=string(f.get('college'));vals.division=string(f.get('division'));vals.current=f.get('current')!=='false';if(!vals.college){toast('Enter the current college.');return;}
+  const names=f.getAll('pd9CollegeName[]'),levels=f.getAll('pd9CollegeDivision[]'),from=f.getAll('pd9CollegeStart[]'),to=f.getAll('pd9CollegeEnd[]');
+  vals.collegeHistory=names.map((n,i)=>({college:string(n),division:string(levels[i]),startYear:string(from[i]),endYear:string(to[i])})).filter(x=>x.college);
+ }else{vals.status=string(f.get('status'))||'current';vals.organization=string(f.get('organization'));vals.currentLevel=string(f.get('currentLevel'));vals.highestLevel=string(f.get('highestLevel'));if(!vals.highestLevel){toast('Enter the highest professional level reached.');return;}}
+ let a=(app.db.alumni||[]).find(x=>x.id===app.adminAlumniEditId);if(a)Object.assign(a,vals);else app.db.alumni.push({id:uid('alumnus'),...vals});
+ app.adminAlumniEditId=null;saveDraft();render();toast('Alumni record and player link saved.');
+};
+function playerCareer(id){const p=app.db.players.find(x=>x.id===id);if(!p)return existingPlayerDetail(id);
+ const history=assignments(p).slice().sort((a,b)=>Number(b.season)-Number(a.season)||a.teamId.localeCompare(b.teamId));
+ const current=history.find(h=>h.season===String(app.season))||history[0];const t=team(current?.teamId||p.teamId);const season=String(app.season);
+ const bats=battingTotals(id,season),pits=pitchingTotals(id,season),fld=fieldingTotals(id,season),careerB=battingTotals(id,null),careerP=pitchingTotals(id,null);
+ const rows=history.map(h=>{const b=teamStat(id,h.season,h.teamId,'batting'),pi=teamStat(id,h.season,h.teamId,'pitching');return `<tr><td>${esc(h.season)}</td><td><a href="#team:${esc(h.teamId)}">${esc(teamName(h.teamId))}</a></td><td>${esc(h.position||'—')}</td><td class="num">${b.ab}</td><td class="num">${b.h}</td><td class="num">${b.avg}</td><td class="num">${b.ops}</td><td class="num">${pi.outs?pi.ip:'—'}</td><td class="num">${pi.outs?pi.era:'—'}</td><td class="num">${pi.so}</td></tr>`;}).join('');
+ const al=(app.db.alumni||[]).filter(a=>a.playerId===p.id&&(a.category==='pro'||a.current!==false));
+ const college=al.filter(x=>x.category==='college').map(a=>`<div class="pd9-year"><div><strong>${esc(a.college)} · Current college player</strong><div class="pd9-subline">${esc(a.division||'')} · ${esc(a.position||'')} · Verified ${esc(a.verifiedDate||'not dated')}</div>${a.collegeHistory?.length?`<div class="pd9-transfer-history">${a.collegeHistory.map(h=>`<span class="pd9-transfer-chip">${esc(h.college)}${h.startYear?' · '+esc(h.startYear):''}${h.endYear?'–'+esc(h.endYear):''}</span>`).join('')}<span>→</span><span class="pd9-transfer-chip">${esc(a.college)} (current)</span></div>`:''}</div></div>`).join('');
+ const pros=al.filter(x=>x.category==='pro').map(a=>`<div class="pd9-year"><div><strong>${esc(a.status==='former'?'Former':'Current')} professional · ${esc(a.organization||'Organization not entered')}</strong><div class="pd9-subline">${a.status==='former'?'Highest level: '+esc(a.highestLevel||'—'):'Current level: '+esc(a.currentLevel||'—')+' · Highest: '+esc(a.highestLevel||'—')}</div></div></div>`).join('');
+ const logs=[];
+ for(const g of [...app.db.games].sort((a,b)=>String(b.date).localeCompare(String(a.date))))for(const side of ['away','home']){const b=g.batting?.[side]?.find(r=>r.playerId===id),q=g.pitching?.[side]?.find(r=>r.playerId===id);if(!b&&!q)continue;logs.push({g,side,b,q});}
+ return `<a href="#players" class="back-link">← Player directory</a><div class="pd9-bio"><div><span class="eyebrow">CAREER PLAYER PROFILE · ${esc(app.season)} SEASON VIEW</span><h1>${esc(p.name)}</h1><p>${esc(p.position||'Baseball')} · ${p.gradYear?'Class of '+esc(p.gradYear):'Graduation year unverified'} · ${esc(teamName(t.id))}</p></div>${teamMark(t)}</div><div class="pd9-source-banner">One permanent player profile across high school transfers. Box scores are credited to the school on that particular game, not necessarily the player's most recent school. Only explicitly linked college/pro entries appear below.</div><div class="pd9-cards"><div class="pd9-card"><b>${esc(season)} batting</b><strong>${bats.avg}</strong><small>${bats.h} H · ${bats.ab} AB · ${bats.ops} OPS</small></div><div class="pd9-card"><b>${esc(season)} pitching</b><strong>${pits.era}</strong><small>${pits.outs?pits.ip:'0.0'} IP · ${pits.so} K · 7-inning ERA</small></div><div class="pd9-card"><b>High school career hits (entered)</b><strong>${careerB.h}</strong><small>${careerB.ab} at-bats · ${careerB.rbi} RBI</small></div><div class="pd9-card"><b>High school career pitching (entered)</b><strong>${careerP.outs?careerP.ip:'0.0'}</strong><small>${careerP.so} strikeouts · ${careerP.outs?careerP.era:'—'} ERA</small></div></div><div class="filter-bar"><div class="filter-item"><label>Season</label>${seasonFilter()}</div></div><section class="team-section"><div class="section-line"><div><h2>High school career by season</h2><p>One season and school per row; two rows appear if a player played at two schools in the same year</p></div></div><div class="panel table-wrap pd9-season-history-table"><table><thead><tr><th>Season</th><th>School</th><th>Pos.</th><th class="num">AB</th><th class="num">H</th><th class="num">AVG</th><th class="num">OPS</th><th class="num">IP</th><th class="num">ERA</th><th class="num">K</th></tr></thead><tbody>${rows||'<tr><td colspan="10">No high school seasons linked yet.</td></tr>'}</tbody></table></div></section><section class="team-section"><h2>${esc(season)} complete batting / pitching</h2><div class="panel table-wrap">${battingTable([bats],['TOTAL'],false)}</div><div class="panel table-wrap">${pitchingTable([pits],['TOTAL'],false)}</div></section><section class="team-section"><h2>${esc(season)} fielding</h2><div class="panel table-wrap"><table><thead><tr><th>Player</th><th class="num">PO</th><th class="num">A</th><th class="num">E</th></tr></thead><tbody><tr><td>${esc(p.name)}</td><td class="num">${fld.po??'—'}</td><td class="num">${fld.a??'—'}</td><td class="num">${fld.e??'—'}</td></tr></tbody></table></div></section><section class="team-section"><h2>College and professional history</h2>${college||pros?college+pros:'<div class="panel empty">No alumni record linked yet. Use Site Editor → College & pros to connect this player to college or professional history.</div>'}</section><section class="team-section"><h2>Game-by-game career log</h2><div class="panel table-wrap"><table><thead><tr><th>Date</th><th>School</th><th>Opponent</th><th class="num">AB</th><th class="num">H</th><th class="num">IP</th><th class="num">K</th></tr></thead><tbody>${logs.map(({g,side,b,q})=>`<tr><td><a href="#game:${esc(g.id)}">${esc(fmtDate(g.date,'short'))}</a></td><td><a href="#team:${esc(g[side+'Id'])}">${esc(teamName(g[side+'Id']))}</a></td><td>${esc(teamName(g[side==='home'?'awayId':'homeId']))}</td><td class="num">${b?safeNum(b.ab):'—'}</td><td class="num">${b?safeNum(b.h):'—'}</td><td class="num">${q?esc(q.ip):'—'}</td><td class="num">${q?safeNum(q.so):'—'}</td></tr>`).join('')||'<tr><td colspan="7">No box scores entered for this player yet.</td></tr>'}</tbody></table></div></section>`;
+}
+renderPlayerDetail=playerCareer;
+// Add old seasons and transfer histories without changing the existing database file.
+document.addEventListener('submit',e=>{if(e.target.id==='pd9-season-form'){e.preventDefault();const y=string(new FormData(e.target).get('year'));if(!yearOK(y)){toast('Enter a year between 1900 and 2099.');return;}app.db.seasons=[...new Set([...(app.db.seasons||[]),y])].sort();app.season=y;app.pd8From=String(Number(y)-1);app.pd8To=y;saveDraft();render();toast(`${y} season ready. Add historical rosters and games.`);}
+ else if(e.target.id==='pd9-assignment-form'||e.target.id==='pd9-link-existing'){e.preventDefault();const f=new FormData(e.target),p=app.db.players.find(p=>p.id===f.get('playerId')),y=string(f.get('year')),tid=string(f.get('teamId')||app.adminRosterTeamId);
+ if(!p||!yearOK(y)||!app.db.teams.some(t=>t.id===tid)){toast('Choose a real player, school and season.');return;}
+ if(rosterAt(p,tid,y)){toast('That player is already on the selected school roster for that season.');return;}
+ addAssignment(p,tid,y,asInteger(f.get('number'))??p.number,string(f.get('position'))||p.position);
+ app.db.seasons=[...new Set([...(app.db.seasons||[]),y])];app.adminRosterEditId=p.id;saveDraft();render();toast(`Linked ${p.name} to ${teamName(tid)} (${y}).`);
+ }
+});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
+ if(b.dataset.action==='pd9-remove-assignment'){e.preventDefault();const p=app.db.players.find(x=>x.id===b.dataset.id),y=b.dataset.year,tid=b.dataset.team;if(!p)return;
+ const hasStats=app.db.games.some(g=>String(g.season||g.date?.slice(0,4))===String(y)&&['home','away'].some(side=>g[side+'Id']===tid&&['batting','pitching','fielding'].some(kind=>g[kind]?.[side]?.some(r=>r.playerId===p.id))));
+ if(hasStats){toast('This season has game stats. Reassign or remove those game lines before deleting its school association.');return;}
+ if(!confirm(`Remove ${p.name} from ${teamName(tid)} in ${y}? Player profile and other seasons will remain.`))return;
+ p.rosterHistory=p.rosterHistory.filter(h=>!(h.teamId===tid&&String(h.season)===String(y)));refreshIdentity(p);saveDraft();render();toast('Season assignment removed.');
+ }else if(b.dataset.action==='pd9-add-college-row'){e.preventDefault();document.querySelector('#pd9-college-history')?.insertAdjacentHTML('beforeend',collegeHistoryRows([{college:'',division:'',startYear:'',endYear:''}]));}
+ else if(b.dataset.action==='pd9-remove-college-row'){e.preventDefault();b.closest('.pd9-college-row')?.remove();}
+});
+window.PalmettoV9=()=>({version:'9.0',activeSeason:app.season,historicalYears:allSeasons(),players:app.db.players.length,rosterAssignments:app.db.players.reduce((n,p)=>n+assignments(p).length,0),linkedAlumni:(app.db.alumni||[]).filter(a=>a.playerId).length});
+})();
+</script>
+
 </body>
 </html>
