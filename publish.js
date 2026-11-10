@@ -1,4 +1,4 @@
-/* Palmetto Diamond 4.0 — live GitHub publishing and reliable school creation.
+/* Palmetto Diamond 5.0 — live GitHub publishing and reliable school creation.
    Never persist a GitHub token. Only the owner/repository/branch are saved. */
 (() => {
   'use strict';
@@ -38,7 +38,7 @@
     const common = {
       401: 'GitHub rejected the token. Check that it is valid.',
       403: 'GitHub refused access. Grant this repository Contents: Read and write.',
-      404: 'Repository or site-data.json not found. First upload the V4 website files to your GitHub repository.',
+      404: 'Repository or site-data.json not found. First upload the V5 website files to your GitHub repository.',
       409: 'The file was changed by someone else. Refresh the connection and resolve conflicting edits.',
       422: 'GitHub could not process this file update. Check branch permissions and repository settings.'
     };
@@ -141,7 +141,7 @@
   adminPublish = function () {
     return `<div class="panel"><div class="panel-head"><h3>Publish the public website</h3><span class="subtext">GitHub Pages · no hosting charge</span></div>
     <div class="admin-form">
-    <div class="workflow-steps"><div class="step"><strong>1</strong><span><b>Create a GitHub repository</b><small>Upload the files in the V4 ZIP and enable Pages (main branch, root). You only need to do this once.</small></span></div>
+    <div class="workflow-steps"><div class="step"><strong>1</strong><span><b>Create a GitHub repository</b><small>Upload the files in the V5 ZIP and enable Pages (main branch, root). You only need to do this once.</small></span></div>
     <div class="step"><strong>2</strong><span><b>Make your edits</b><small>Add schools, logos, articles, rosters and game statistics. They save as a local editing draft until published.</small></span></div>
     <div class="step"><strong>3</strong><span><b>Publish from here</b><small>Connect a fine-grained token for your repository to commit the public dataset to site-data.json. Do not share tokens with anyone.</small></span></div></div>
     <form id="github-connection-form" class="form-grid two" autocomplete="off">

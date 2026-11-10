@@ -70,3 +70,51 @@
 /* On the public site the editor is invisible, not protected by obscurity; a GitHub token gates actual writes. */
 html:not(.editor-mode) .header-editor,html:not(.editor-mode) .quick-edit-wrap,html:not(.editor-mode) .inline-edit-shell,html:not(.editor-mode) a[href="#admin"],html:not(.editor-mode) button[data-action="add-school"],html:not(.editor-mode) button[data-action="new-story"],html:not(.editor-mode) button[data-action="admin-rpi"],html:not(.editor-mode) button[data-action="admin-prefs"],html:not(.editor-mode) button[data-action="manage-stories"],html:not(.editor-mode) button[data-action="inline-edit-story"],html:not(.editor-mode) button[data-action="inline-edit-team"],html:not(.editor-mode) button[data-action="inline-edit-site"]{display:none!important}
 @media(max-width:760px){.workflow-steps{grid-template-columns:1fr}.workflow-steps .step{padding:10px}}
+
+/* Palmetto Diamond 5.0: school colors, scouting opponents, tournaments and neutral-site fields */
+.team-themed .team-heading{
+  background:var(--team-primary);color:var(--team-on-primary);
+  border-left:9px solid var(--team-secondary);
+  box-shadow:inset 0 -7px 0 var(--team-secondary);
+}
+.team-themed .team-heading h1,.team-themed .team-heading .team-record strong{color:var(--team-on-primary)}
+.team-themed .team-heading p,.team-themed .team-heading .team-record small{color:var(--team-on-primary);opacity:.83}
+.team-themed .team-heading .eyebrow{color:var(--team-on-primary)!important;opacity:.9}
+.team-themed .team-heading .team-mark{background:var(--team-secondary)!important;color:var(--team-on-secondary);border:3px solid var(--team-on-primary)}
+.team-themed .metric{border-top:4px solid var(--team-secondary)}
+.team-themed .metric strong{color:var(--team-primary)}
+.team-themed .detail-tabs button.active,.team-themed .detail-tabs button:hover{background:var(--team-primary);color:var(--team-on-primary);border-color:var(--team-primary)}
+.team-themed .section-line h2,.team-themed .stat-group-heading{border-left:4px solid var(--team-secondary);padding-left:10px}
+.team-themed .panel a:not(.btn):hover,.team-themed .see-all{color:var(--team-primary)}
+.team-themed .qualification-banner{border-left:4px solid var(--team-secondary)}
+.team-secondary-rule{height:5px;display:flex;gap:0;margin:28px 0 5px;overflow:hidden;border-radius:8px}
+.team-secondary-rule span:first-child{background:var(--team-primary);width:65%}.team-secondary-rule span:last-child{background:var(--team-secondary);width:35%}
+.two-tone-tile{position:relative;border-top:5px solid var(--team-primary);overflow:hidden}
+.two-tone-tile:before{content:"";position:absolute;right:0;top:-5px;height:5px;width:33%;background:var(--team-secondary)}
+.two-tone-tile .team-tile-foot{border-top:1px solid #e9edf2;padding-top:12px}
+.two-tone-tile .team-tile-foot span:last-child{color:var(--team-primary)}
+.two-tone-tile .team-mark{border:3px solid var(--team-secondary)}
+.scouting-opponent-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:0 0 14px;border:1px solid #c8dcf1;background:#edf6ff;color:#24496e;padding:12px 16px;border-radius:10px;font-size:12px}
+.scouting-opponent-banner strong{font-size:12px;letter-spacing:.03em}
+.scouting-opponent-banner span{color:#506984;font-size:11px}
+.venue-small{display:block;font-size:10px;line-height:1.45;color:#607085;font-weight:600;text-transform:none;max-width:220px}
+.event-label{font-weight:800;color:#ac4e36}
+.score-meta .venue-small{font-size:9px;margin-top:3px;max-width:120px}
+.game-venue-banner,.score-site-info{display:flex;align-items:center;flex-wrap:wrap;gap:8px;background:#f2f6fa;border-radius:8px;margin:4px 16px 12px;padding:11px 13px;color:#465c75;font-size:11px}
+.game-venue-banner span,.score-site-info span,.score-site-info strong{background:white;padding:4px 7px;border:1px solid #e4eaf0;border-radius:6px}
+.tournament-field-action{justify-content:end}
+.tournament-field-action .btn{align-self:flex-start}
+.tournament-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.tournament-card{padding:22px;border-top:5px solid #e76748}
+.tournament-card h3{margin:8px 0 6px;font:900 29px/1.05 var(--display);text-transform:uppercase;letter-spacing:.015em}
+.tournament-card>p{font-size:12px;line-height:1.65;color:#607085;margin:4px 0 12px}
+.event-type{font-size:10px;color:#c45338;text-transform:uppercase;font-weight:900;letter-spacing:.07em}
+.event-count{font-weight:800;font-size:11px;color:#213951;margin:12px 0}
+.event-games{display:grid;gap:2px;max-height:330px;overflow:auto}
+.event-games>div{padding:9px 0;border-bottom:1px solid #edf0f3;display:grid;grid-template-columns:72px 1fr auto;gap:8px;align-items:center;font-size:11px}
+.event-games a{font-weight:800;color:#162d4b}
+.event-games small{color:#7a8794;font-size:10px}
+@media(max-width:830px){.tournament-grid{grid-template-columns:1fr}.scouting-opponent-banner{display:block}.scouting-opponent-banner span{display:block;margin-top:5px}}
+@media(max-width:590px){.team-themed .team-heading{padding:22px 16px;border-left-width:5px}.team-themed .team-heading h1{font-size:36px}.tournament-card{padding:16px}.event-games>div{grid-template-columns:58px 1fr}.event-games small{display:none}.score-site-info{margin:5px 0}}
+
+.score-event-mini{margin-top:5px;font-size:10px;line-height:1.45;color:#6d7d90;font-weight:700}
