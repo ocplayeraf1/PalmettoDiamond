@@ -1,0 +1,319 @@
+{
+  "meta": {
+    "siteName": "Palmetto Diamond",
+    "edition": "2027 independent preseason edition",
+    "lastUpdated": "2026-11-09",
+    "description": "Palmetto Diamond preview directory; no box scores preloaded. Player and team data is preliminary until verified."
+  },
+  "teams": [
+    {
+      "id": "hanahan",
+      "name": "Hanahan",
+      "mascot": "Hawks",
+      "short": "HAN",
+      "classification": "3A",
+      "region": "5",
+      "city": "Hanahan",
+      "color": "#e65349",
+      "logo": "",
+      "coach": "",
+      "description": "",
+      "websiteUrl": ""
+    },
+    {
+      "id": "bishop-england",
+      "name": "Bishop England",
+      "mascot": "Bishops",
+      "short": "BEN",
+      "classification": "3A",
+      "region": "5",
+      "city": "Charleston",
+      "color": "#b13f46",
+      "logo": "",
+      "coach": "",
+      "description": "",
+      "websiteUrl": ""
+    },
+    {
+      "id": "oceanside",
+      "name": "Oceanside Collegiate",
+      "mascot": "Landsharks",
+      "short": "OCA",
+      "classification": "3A",
+      "region": "5",
+      "city": "Mount Pleasant",
+      "color": "#008eaa",
+      "logo": "",
+      "coach": "",
+      "description": "",
+      "websiteUrl": ""
+    },
+    {
+      "id": "georgetown",
+      "name": "Georgetown",
+      "mascot": "Bulldogs",
+      "short": "GEO",
+      "classification": "3A",
+      "region": "5",
+      "city": "Georgetown",
+      "color": "#234cb5",
+      "logo": "",
+      "coach": "",
+      "description": "",
+      "websiteUrl": ""
+    },
+    {
+      "id": "north-charleston",
+      "name": "North Charleston",
+      "mascot": "Cougars",
+      "short": "NCH",
+      "classification": "3A",
+      "region": "5",
+      "city": "North Charleston",
+      "color": "#ad7531",
+      "logo": "",
+      "coach": "",
+      "description": "",
+      "websiteUrl": ""
+    },
+    {
+      "id": "aynor",
+      "name": "Aynor",
+      "mascot": "Blue Jackets",
+      "short": "AYN",
+      "classification": "3A",
+      "region": "",
+      "city": "Aynor",
+      "color": "#386ac7",
+      "logo": "",
+      "coach": "",
+      "description": "",
+      "websiteUrl": ""
+    }
+  ],
+  "players": [
+    {
+      "id": "p-nickels",
+      "teamId": "hanahan",
+      "name": "N. Nickels",
+      "number": 4,
+      "position": "",
+      "gradYear": 2029,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-sprovero",
+      "teamId": "hanahan",
+      "name": "H. Sprovero",
+      "number": 20,
+      "position": "C",
+      "gradYear": 2026,
+      "rosterSeasons": [
+        "2026"
+      ]
+    },
+    {
+      "id": "p-gallus",
+      "teamId": "hanahan",
+      "name": "T. Gallus",
+      "number": 2,
+      "position": "P",
+      "gradYear": 2028,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-atencio",
+      "teamId": "hanahan",
+      "name": "R. Atencio",
+      "number": 8,
+      "position": "SS",
+      "gradYear": 2028,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-muirheid",
+      "teamId": "hanahan",
+      "name": "W. Muirheid",
+      "number": 21,
+      "position": "1B",
+      "gradYear": 2027,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-carr",
+      "teamId": "hanahan",
+      "name": "C. Carr",
+      "number": 6,
+      "position": "RF",
+      "gradYear": 2029,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-rennie",
+      "teamId": "hanahan",
+      "name": "B. Rennie",
+      "number": 12,
+      "position": "P",
+      "gradYear": 2030,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-polm",
+      "teamId": "hanahan",
+      "name": "C. Polm",
+      "number": 11,
+      "position": "",
+      "gradYear": 2027,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-bellamy",
+      "teamId": "hanahan",
+      "name": "M. Bellamy",
+      "number": 23,
+      "position": "",
+      "gradYear": 2027,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-brabham",
+      "teamId": "hanahan",
+      "name": "B. Brabham",
+      "number": 1,
+      "position": "3B",
+      "gradYear": null,
+      "rosterSeasons": [
+        "2026"
+      ]
+    },
+    {
+      "id": "p-haulbrooks",
+      "teamId": "hanahan",
+      "name": "G. Haulbrooks",
+      "number": 14,
+      "position": "CF",
+      "gradYear": null,
+      "rosterSeasons": [
+        "2026"
+      ]
+    },
+    {
+      "id": "p-moll",
+      "teamId": "hanahan",
+      "name": "B. Moll",
+      "number": 7,
+      "position": "LF",
+      "gradYear": 2029,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-marlowe",
+      "teamId": "hanahan",
+      "name": "Kellan Marlowe",
+      "number": null,
+      "position": "",
+      "gradYear": 2029,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-gaspers",
+      "teamId": "hanahan",
+      "name": "J. Gaspers",
+      "number": 9,
+      "position": "P",
+      "gradYear": 2027,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-humbert",
+      "teamId": "hanahan",
+      "name": "Nolan Humbert",
+      "number": 32,
+      "position": "P",
+      "gradYear": 2029,
+      "rosterSeasons": [
+        "2026",
+        "2027"
+      ]
+    },
+    {
+      "id": "p-johnson",
+      "teamId": "hanahan",
+      "name": "Neil Johnson",
+      "number": null,
+      "position": "",
+      "gradYear": 2028,
+      "rosterSeasons": [
+        "2027"
+      ]
+    }
+  ],
+  "games": [],
+  "rpi": [],
+  "rankings": [],
+  "articles": [
+    {
+      "id": "article-welcome",
+      "title": "A home for the South Carolina diamond",
+      "dek": "Scores, standings, player profiles, game-by-game statistics and independent high school baseball coverage—all in one place.",
+      "category": "From the editor",
+      "date": "2026-11-09",
+      "author": "Palmetto Diamond",
+      "body": "Welcome to Palmetto Diamond, an independent home for South Carolina high school baseball.\n\nExplore school pages, team rosters, region standings, original stories, and statistical leaders as coverage expands.\n\nScores and statistics will appear after verified games are entered. School rosters currently shown are provisional and will be updated before the season.",
+      "status": "published"
+    }
+  ],
+  "alumni": [],
+  "settings": {
+    "battingPAperTeamGame": 2.25,
+    "pitchingIPperTeamGame": 0.7,
+    "adjustShortenedGames": true
+  },
+  "site": {
+    "brandName": "Palmetto Diamond",
+    "brandSubtitle": "SC HIGH SCHOOL BASEBALL",
+    "ribbon": "INDEPENDENT SOUTH CAROLINA HIGH SCHOOL BASEBALL COVERAGE",
+    "heroEyebrow": "The Palmetto State / The National Pastime",
+    "heroHeadline": "Every inning.\nEvery region.\nEvery story.",
+    "heroDescription": "South Carolina high school baseball in one place. Follow scores, region races, player performance, college alumni, pro alumni, and the stories behind the diamond.",
+    "heroCaption": "INDEPENDENT COVERAGE • SCORES • STATS • SCOUTING • REGION RACES",
+    "homeNewsTitle": "Latest from the diamond",
+    "homeNewsSubtitle": "Original articles, scouting and team coverage",
+    "footerText": "Built for South Carolina baseball. Independent coverage, real game-by-game numbers.",
+    "accentColor": "#ed6049",
+    "logo": ""
+  }
+}
